@@ -19,7 +19,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         UserEntity userData = userRepo.findByUsername(username);
 
         if(userData != null){
-
             return new CustomUserDetails(userData);
         }
         return null;

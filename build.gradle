@@ -36,7 +36,7 @@ dependencies {
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.15'
+//    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.15'
 }
 
 tasks.named('test') {
