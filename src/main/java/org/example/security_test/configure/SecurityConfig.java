@@ -1,19 +1,33 @@
 package org.example.security_test.configure;
 
+import lombok.RequiredArgsConstructor;
+import org.example.security_test.entity.IpBlockEntity;
+import org.example.security_test.handler.CustomLoginFailureHandler;
+import org.example.security_test.handler.CustomLoginSuccessHandler;
+import org.example.security_test.handler.IpBlockFilter;
+import org.example.security_test.repo.IpBlockRepo;
+import org.example.security_test.repo.UserRepo;
+import org.example.security_test.service.LoginTryService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    // PW BCrypt
+    private UserRepo userRepo;
+    private IpBlockRepo ipBlockRepo;
+    private final LoginTryService loginTryService;
+
     @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder(){
+    public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -28,19 +42,20 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 );
 
+        // 로그인에 대한 method chaining
         http
-                .formLogin(auth -> auth
-                        .loginPage("/login")
-                        .loginProcessingUrl("/loginProc")
-                        .permitAll()
+                .formLogin
+                        (auth -> auth
+                                .successHandler(customLoginSuccessHandler())  // 로그인 success 핸들러
+                                .failureHandler(customLoginFailureHandler())  // 로그인 failure 핸들러
+                                .loginPage("/login")
+                                .loginProcessingUrl("/loginProc")
+                                .permitAll()
                 );
 
         // 개발 단계에서 csrf 일단 비활성화
 //        http
 //                .csrf((auth-> auth.disable()));
-
-
-
 
         http
                 .sessionManagement((auth-> auth
@@ -52,7 +67,20 @@ public class SecurityConfig {
                 .sessionManagement((auth -> auth
                         .sessionFixation()  //
                         .changeSessionId()));    // 로그인 시 동일한 Session 에 대한 id 변경
+
+        // 로그인을 시도한 IP 의 account 가 block 인지 아닌지 check
+        http
+                .addFilterBefore(new IpBlockFilter(loginTryService), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
+    // 로그인 suceess handler
+    public CustomLoginSuccessHandler customLoginSuccessHandler(){
+        return new CustomLoginSuccessHandler(userRepo, ipBlockRepo);
+    }
+
+    // 로그인 fail handler
+    public CustomLoginFailureHandler customLoginFailureHandler(){
+        return new CustomLoginFailureHandler(loginTryService);
+    }
 }

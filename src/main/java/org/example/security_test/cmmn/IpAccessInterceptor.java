@@ -2,6 +2,7 @@ package org.example.security_test.cmmn;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -9,8 +10,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Component
+@RequiredArgsConstructor
 public class IpAccessInterceptor implements HandlerInterceptor {
+
     private final List<String> allowedIps = Arrays.asList("127.0.0.1", "::1"); // 허용된 IP 주소 목록
 
     @Override

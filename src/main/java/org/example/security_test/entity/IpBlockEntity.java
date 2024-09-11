@@ -6,7 +6,7 @@ import lombok.Data;
 @Entity
 @Table(name = "ip_block")
 @Data
-public class IpBlock {
+public class IpBlockEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id")

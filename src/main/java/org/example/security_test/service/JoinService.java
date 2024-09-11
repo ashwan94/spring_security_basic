@@ -11,12 +11,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class JoinService {
 
-    @Autowired
     private UserRepo userRepo;
 
-    @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public void joinProcess(JoinDTO joinDTO){
